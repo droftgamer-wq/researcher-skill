@@ -71,20 +71,11 @@ Same question, with and without the skill:
 
 **Claude Code:**
 ```bash
-# Copy to skills directory
-mkdir -p ~/.claude/skills/researcher
-cp SKILL.md ~/.claude/skills/researcher/SKILL.md
-
-# Use it
-# /researcher your question here
+git clone https://github.com/recomby-ai/researcher-skill.git
+cp -r researcher-skill/researcher ~/.claude/skills/
 ```
 
-**NanoClaw / other agent platforms:**
-```bash
-# Package as zip
-zip researcher.zip SKILL.md
-# Install via your platform's skill installer
-```
+Then use `/researcher your question` in Claude Code.
 
 ## Usage
 
