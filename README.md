@@ -1,8 +1,8 @@
 # Researcher — ReAct Deep Search Skill
 
-Claude is already great at reasoning. But when it searches the web, it searches once, reads the snippets, and gives you an answer. That's breadth — not depth. It's what any search engine does.
+Claude is already great at reasoning. But when it searches the web, it searches once, reads the snippets, and gives you an answer. Even "deep research" products (ChatGPT Deep Research, Gemini Deep Research) just search more times — 50 independent queries, summarized into a longer report. More searches ≠ deeper. It's still breadth.
 
-This skill is a single prompt that changes how Claude searches. Instead of one broad sweep, Claude now follows leads: each search round is driven by what the previous round discovered, chasing citations forward and backward through the academic literature until it hits primary sources. Same Claude, deeper search.
+This skill is a single prompt that changes how Claude searches. Instead of many independent sweeps, Claude now reasons between rounds: each search is driven by leads discovered in the previous one, chasing citations forward and backward through the literature until it hits primary sources. Same Claude, actually deeper search.
 
 ## Two Core Ideas
 
