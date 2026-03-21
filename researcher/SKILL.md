@@ -29,7 +29,9 @@ SEARCH → REASON → ACT → repeat
 
 **ACT**: Follow the most important lead from REASON. This becomes the next SEARCH query. Each round must go deeper than the last — not wider.
 
-**Stop when**: New searches return no new concepts (saturation), AND key claims have primary sources, AND both supporting and opposing evidence have been found. Minimum 3 rounds.
+**REFLECT** (before answering): Review every finding. For each one, check: is the source ✓ (read original) or ? (only snippet)? Too many ? means go back and do another SEARCH round to upgrade them to ✓. Also check: did I search for counter-evidence? Did I actually follow citation chains or just do keyword searches? If any check fails, re-enter the loop.
+
+**Stop when**: REFLECT passes — key claims have ✓ primary sources, counter-evidence was searched, citation chains were followed to saturation. Minimum 3 rounds.
 
 ## Scientific Literature Method
 
