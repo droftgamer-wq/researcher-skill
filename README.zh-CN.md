@@ -1,157 +1,94 @@
-# Researcher
+# Research Skills
 
-一个面向 Claude Code 的前沿搜索与 ReAct 深度研究 skill。
+一组面向 Codex / Claude Code 的按研究目的拆分的 research skills。
 
-这个 skill 的目标很明确：把研究行为从“搜一次、读摘要、直接总结”，改造成
-“先建图、再跟线索、一直追到一手来源或证据图谱饱和”。
+这个仓库最初只有一个 `researcher` skill，现在已经升级成一个小型 research
+skill system：
+
+- 一个共享 core 和总入口 skill
+- 多个按搜索目的拆分的 skill
+- 一组共享 references，用来定义证据类型、查询策略和反证路径
 
 [English](README.md) | 中文
 
-## 快速导航
+## 这套仓库是干什么的
 
-- [这个 Skill 是干什么的](#这个-skill-是干什么的)
-- [搜索策略](#搜索策略)
-- [它和普通深搜有什么不同](#它和普通深搜有什么不同)
-- [对科研问题为什么更友好](#对科研问题为什么更友好)
-- [仓库结构](#仓库结构)
-- [安装](#安装)
-- [使用示例](#使用示例)
-- [核心规则](#核心规则)
-- [局限](#局限)
+它适合处理这类研究任务：
 
-## 一眼看懂
+- 问题开放，不是一条链接就能回答
+- 来源很多，而且经常互相矛盾
+- 最终需要判断，不只是摘录资料
+- 很容易被 hype、单边叙事、浅层总结带偏
 
-| | 普通“深度搜索” | 这个 skill |
-|---|---|---|
-| 第一轮 | 搜索并总结 | 先广度建图 |
-| 搜索结构 | 网页很多，结构较弱 | 明确维护证据图谱 |
-| 线索选择 | 改写查询词 | 用 frontier 选分支 |
-| 深度策略 | 常常广而浅 | 多分支 ReAct 深跳 |
-| 时效规则 | 常常写死时间窗 | 按领域找最新可获得来源 |
-| 停止规则 | 到轮数或上下文上限就停 | 研究图谱饱和才停 |
-| 风格 | 聚合器 | 调查员 |
-
-## 这个 Skill 是干什么的
-
-很多所谓的“深度搜索”本质上还是广度聚合器：搜很多网页、抓很多内容、最后压缩成一段总结。
-这当然有用，但它不像真正的研究员或调查员。
-
-这个 skill 改的是搜索策略本身，核心有三步：
-
-1. `先广度建图`
-   第一轮不急着回答，而是先把领域地图铺开：综述、最新代表工作、基础文献、
-   benchmark、争议和限制条件。
-2. `然后维护多分支 frontier`
-   不会过早只押一条线，而是保留多条活跃分支，动态决定下一轮追哪些。
-3. `每条分支都按 ReAct 深跳`
-   后续每轮都由上一轮结果驱动：
-   `SEARCH / FETCH -> REASON -> NEXT JUMP`
-
-所以它更像是在“沿着证据图谱调查”，而不是“堆网页后做摘要”。
-
-## 搜索策略
-
-这个 skill 的核心循环是：
+整套方法保留了原来“先广后深”的核心思想，但把它升级成了“证据驱动的调查流程”：
 
 ```text
-MAP -> BUILD FRONTIER -> DEEPEN -> REFLECT -> repeat
+FRAME -> MAP -> FRONTIER -> DEEPEN -> CHALLENGE -> SYNTHESIZE
 ```
 
-### 阶段 1：先建领域地图
+这意味着：
 
-第一轮明确是广度优先，任务不是回答问题，而是建立 field map。
+- 第一轮不是堆网页，而是建证据地图
+- 后续搜索不是改关键词，而是沿线索推进
+- 重要结论必须经过支持路径、反证路径和外显日志
 
-它会尽量覆盖：
-- 该领域当前能拿到的最新综述性来源
-- 最近有代表性的工作
-- 基础性、定义性的来源
-- benchmark、dataset、标准或评测层
-- criticism、limitation、replication、竞争路线
+## 包含哪些 Skills
 
-一个关键点是：它不会写死“最近一年”这种时间窗。
+| Skill | 适用场景 |
+|---|---|
+| `researcher` | 当问题比较模糊，需要先路由研究模式并运行共享 research OS |
+| `field-mapping-research` | 先摸清一个领域、赛道、问题空间的地图 |
+| `claim-validation-research` | 验证某个 claim、报告、数据、说法是否站得住 |
+| `decision-support-research` | 为真实决策做研究，比较选项并给建议 |
+| `opportunity-research` | 找机会、找增长点、找值得下注的方向 |
+| `due-diligence-research` | 做公司/产品/叙事的压力测试和尽调 |
+| `operator-reality-research` | 看一线从业者真实体验、隐藏摩擦和社区现实 |
 
-这里的“最新”指的是这个领域里“当前可获得的最新高质量来源”：
-- 慢领域里，最新综述可能是几年前的
-- 快领域里，可能就是最近几个月的
-- 新方向里，可能根本没有正式综述，只能退到 tutorial、benchmark、perspective
+## 设计核心
 
-### 阶段 2：构建 frontier，而不是只追一条线
+### 1. 先按搜索目的分，不按主题分
 
-建图后，这个 skill 会维护一个 frontier，也就是一组待追的候选线索，而不是马上锁死到一条路径。
+顶层 skill 不是按“搜论文 / 搜工作 / 搜公司”来切，而是按“为什么要搜”来切。
 
-典型的 branch 类型包括：
-- 方法分支
-- 证据分支
-- benchmark 分支
-- 作者 / 实验室分支
-- 批评 / 限制分支
-- 一手文档分支
+因为一个真实问题经常同时跨很多来源。
 
-这也是它和普通 citation chaining 最大的差异：它保留足够的分支宽度，避免 tunnel vision。
+比如：
 
-### 阶段 3：按 ReAct 深跳
+`“AI agent engineer 到底是不是一个真实的 entry-level 路径？”`
 
-对每条活跃分支，它都会执行：
+这不是单纯的招聘问题，它可能同时需要：
 
-```text
-SEARCH / FETCH -> REASON -> NEXT JUMP
-```
+- 精确标题岗位
+- 相邻标题岗位
+- 公司 career page
+- LinkedIn 职业轨迹
+- Reddit / forum 真实体验
+- 反方或怀疑路径
 
-并且每一轮都记录：
-- `[Finding]` 这一步确认或推翻了什么
-- `[Lead]` 出现了什么新线索
-- `[Gap]` 哪个关键 claim 还没有一手来源
-- `[Next Jump]` 下一跳为什么值得追
+### 2. 不再只用单一 source hierarchy
 
-这意味着后续的搜索不是简单改写关键词，而是根据新发现的结构做跳转。
+共享 references 把互联网看成一个混合证据环境，而不是简单的“权威来源列表”。
 
-### 阶段 4：按饱和停止，而不是按轮数停止
+核心 source classes 包括：
 
-这个 skill 不会因为“已经搜了 3 轮”就停。
+- official
+- behavioral
+- operator
+- lived experience
+- adversarial
+- market proxy
+- artifact
 
-它的停止标准是研究图谱接近饱和：
-- 主要分支已经覆盖
-- 关键 claim 已经挂到一手来源或最高价值来源
-- 新搜索结果大多只是返回已知节点
-- 剩余分支的信息增量明显变低
+这样就不会：
 
-## 它和普通深搜有什么不同
+- 把官方来源直接当成事实本身
+- 把 Reddit / X / LinkedIn / 做空报告直接排除掉
 
-这个 skill 主要是为了避开三类常见失败模式：
+### 3. 强制外显推理
 
-1. `广而浅`
-   搜很多，但没有真正追到关键线索。
-2. `过早变窄`
-   太早押一条主线，漏掉其他重要分支。
-3. `伪时效性规则`
-   把“最近”粗暴写成“最近一年”，导致在慢领域直接失真。
+每个 skill 都要求在执行中维护 `research-{topic}.md`，把研究路径写出来。
 
-它的设计组合是：
-- breadth-first 建图
-- 多分支 frontier 管理
-- ReAct 驱动深跳
-- 按领域切换 source hierarchy
-- 按饱和而不是按轮数停止
-
-## 对科研问题为什么更友好
-
-这个 skill 对科研 / 技术研究做了专门优化，目标是保证它在文献综述类任务里也好用。
-
-它会同时保住领域的两端：
-- 最新前沿
-- 基础源头
-
-优先覆盖：
-- 最新可获得的 review / survey / tutorial / benchmark / perspective
-- 最近的代表性论文
-- foundational paper
-- benchmark 和评测协议
-- criticism / limitation / replication
-
-它还允许“一手来源”的定义按领域变化：
-- 科研：原始论文、附录、代码、数据集、benchmark 文档
-- 产业：财报、监管文件、专利、标准、官方技术文档
-- 医学：systematic review、RCT、指南、registry、监管来源
+目标很明确：避免“搜了很多，但看不到推理过程”。
 
 ## 仓库结构
 
@@ -159,101 +96,130 @@ SEARCH / FETCH -> REASON -> NEXT JUMP
 researcher-skill/
 ├── README.md
 ├── README.zh-CN.md
-└── researcher/
-    ├── SKILL.md
-    └── references/
-        ├── frontier-management.md
-        ├── scientific-literature.md
-        ├── source-hierarchy.md
-        ├── saturation-and-counterevidence.md
-        └── query-shaping.md
+├── researcher/
+│   ├── SKILL.md
+│   ├── agents/openai.yaml
+│   └── references/
+│       ├── core-method.md
+│       ├── frontier-management.md
+│       ├── query-shaping.md
+│       ├── saturation-and-counterevidence.md
+│       ├── scientific-literature.md
+│       ├── source-hierarchy.md
+│       ├── source-packs-company-intel.md
+│       ├── source-packs-field-signals.md
+│       └── source-packs-jobs.md
+├── field-mapping-research/
+├── claim-validation-research/
+├── decision-support-research/
+├── opportunity-research/
+├── due-diligence-research/
+└── operator-reality-research/
 ```
 
-- `researcher/SKILL.md`
-  放核心流程和硬约束。
-- `researcher/references/frontier-management.md`
-  放 frontier 打分、分支类型、广度下限和剪枝规则。
-- `researcher/references/scientific-literature.md`
-  放综述选择、文献跳转和图谱 traversal 规则。
-- `researcher/references/source-hierarchy.md`
-  放不同领域里什么算一手或最高价值来源。
-- `researcher/references/saturation-and-counterevidence.md`
-  放反证路径和饱和停止规则。
-- `researcher/references/query-shaping.md`
-  放建图阶段和深跳阶段的 query 模板。
+## 它们怎么协作
 
-这样拆是故意的：主 prompt 保持简洁，复杂规则按决策类型拆开，按需加载。
+`researcher/` 是共享 core：
 
-## 一个简化示例
+- 总入口 skill
+- 核心工作流
+- source hierarchy
+- query shaping
+- challenge path 逻辑
+- 各类 source packs
 
-```text
-Round 1: Map "LLM hallucination mitigation"
-  -> review / benchmark / recent papers / foundational papers / criticism
-  -> 得到几条分支：
-     A. retrieval-based methods
-     B. decoding-time methods
-     C. internal steering methods
-     D. benchmark validity / limitations
+其他 purpose-specific skills 刻意写得更薄：
 
-Round 2: Deepen A + C + D
-  -> A 追到 benchmark 和 dataset 细节
-  -> C 追到最新的表示操控类论文
-  -> D 追到 replication 和 evaluation limitation
+- trigger 更清晰
+- workflow 更聚焦
+- 通过 `../researcher/references/...` 复用共享方法
 
-Round 3+: Jump to primary sources
-  -> 向后跳、向前跳、横向跳、向下跳
-  -> 读原始论文、附录、代码、benchmark 文档
-  -> 弱分支降权，高价值分支继续保留
+这样做的好处是：
 
-Stop:
-  -> 不再出现新的方法类、新证据层级或新争议
-```
+- 共享方法统一维护
+- 各 skill 可以按研究目的单独调优
+- 不会把一个 skill 写成巨大的万能 prompt
 
-## 安装
+## 安装方式
 
-克隆仓库：
+### 本地安装
+
+先克隆仓库：
 
 ```bash
 git clone https://github.com/recomby-ai/researcher-skill.git
 ```
 
-安装到 Claude Code：
+然后把所有 skill 目录一起复制到你的 Codex / Claude skill 目录：
 
 ```bash
-cp -r researcher-skill/researcher ~/.claude/skills/
+cp -R researcher-skill/researcher ~/.codex/skills/
+cp -R researcher-skill/field-mapping-research ~/.codex/skills/
+cp -R researcher-skill/claim-validation-research ~/.codex/skills/
+cp -R researcher-skill/decision-support-research ~/.codex/skills/
+cp -R researcher-skill/opportunity-research ~/.codex/skills/
+cp -R researcher-skill/due-diligence-research ~/.codex/skills/
+cp -R researcher-skill/operator-reality-research ~/.codex/skills/
 ```
 
-然后这样使用：
+如果你用的是 Claude Code，就复制到 `~/.claude/skills/`。
 
-```text
-/researcher 你的问题
-```
+注意：
+
+- `researcher/` 必须和其他 purpose skills 一起安装
+- 因为共享 references 都在 `researcher/` 里面
+
+### 网页版上传
+
+如果你要上传到网页版，请把多个 skill 目录一起打包成 zip。
+
+至少要包含：
+
+- `researcher/`
+- `field-mapping-research/`
+- `claim-validation-research/`
+- `decision-support-research/`
+- `opportunity-research/`
+- `due-diligence-research/`
+- `operator-reality-research/`
+
+不要只上传某一个 purpose-specific skill 而不带 `researcher/`，否则共享
+references 会缺失。
 
 ## 使用示例
 
 ```text
-/researcher What are the current solutions to LLM hallucination?
-/researcher CRISPR off-target detection methods — state of the art
-/researcher Is solid-state battery mass production realistic by 2026?
-/researcher Verify whether this industry claim traces back to a primary source
+Use $field-mapping-research to map the AI agent engineering job market.
+Use $claim-validation-research to verify whether this industry claim holds up.
+Use $decision-support-research to compare quant, AI infrastructure, and applied ML for a math undergraduate.
+Use $opportunity-research to identify the most promising wedges in vertical AI for SMBs.
+Use $due-diligence-research to stress-test this startup narrative.
+Use $operator-reality-research to find what practitioners actually complain about in production agent systems.
+Use $researcher to investigate what is really happening here and choose the right research mode.
 ```
 
-## 核心规则
+## 当前这版重点修了什么
 
-- 不能搜一轮就回答。
-- 重要 claim 不能只靠综述或二手总结。
-- 除非用户明确要求，否则不要把时间窗写死。
-- 不要过早只剩一个 branch。
-- 除非 field map 确实有盲点，否则不要重新退化成泛泛广搜。
-- 必须主动找反证，不只找支持证据。
-- 按饱和停止，不按轮数停止。
+这次重构主要是为了修掉几个常见问题：
+
+- 只会泛搜，不会沿线索深追
+- 只找支持证据，不主动找反证
+- 招聘/市场研究被岗位标题表面带偏
+- 搜了很多，但推理过程不可见
+
+所以现在这些 skill 会明确推动：
+
+- breadth-first 的证据建图
+- 可见研究日志
+- exact-title 和 adjacent-title 并查
+- 把社区信号、对抗性材料和 operator 视角正式纳入研究
 
 ## 局限
 
-- 无法通过普通 WebSearch 直接访问 Google Scholar。
-- 不一定能读到付费论文全文。
-- 仍然受限于搜索工具和抓取工具能接触到的公开网页。
-- 它不是严格意义上的 systematic review 引擎。
+- 仍然受限于当前搜索和抓取工具能访问到的公开网页
+- 某些来源会被登录、平台限制或付费墙挡住
+- 社区/社交来源很有价值，但仍然需要交叉验证
+- 这些 skill 是研究方法增强，不是领域知识的替代品
 
 ## License
 

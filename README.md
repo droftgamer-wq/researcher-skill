@@ -1,165 +1,97 @@
-# Researcher
+# Research Skills
 
-Frontier-driven ReAct research skill for Claude Code.
+Purpose-based research skills for Codex / Claude Code.
 
-This skill is built for one job: turn web research from "search once, summarize
-snippets" into "map the field, follow leads, and keep digging until the answer
-is anchored in primary sources or the evidence graph saturates."
+This repository started as a single `researcher` skill. It is now a small
+research skill system:
+
+- one shared core and router skill
+- multiple purpose-specific skills
+- shared reference packs for evidence classes and search strategy
 
 English | [中文](README.zh-CN.md)
 
-## Quick Nav
+## What This Repository Is
 
-- [What This Skill Does](#what-this-skill-does)
-- [Search Strategy](#search-strategy)
-- [Why This Is Different](#why-this-is-different)
-- [Scientific Research Behavior](#scientific-research-behavior)
-- [Repository Structure](#repository-structure)
-- [Installation](#installation)
-- [Usage Examples](#usage-examples)
-- [Core Rules](#core-rules)
-- [Limitations](#limitations)
+These skills are designed for research tasks that are:
 
-## At a Glance
+- open-ended
+- multi-source
+- judgment-heavy
+- vulnerable to hype, shallow summaries, or one-sided narratives
 
-| | Ordinary "deep search" | This skill |
-|---|---|---|
-| First round | Search and summarize | Breadth-first field mapping |
-| Search structure | Many pages, weak structure | Explicit evidence graph |
-| Lead selection | Query reformulation | Frontier-driven branch selection |
-| Search depth | Often broad but shallow | Multi-branch ReAct deepening |
-| Recency logic | Often fixed windows | Latest available source in-field |
-| Stop rule | Round count or token limit | Saturation of the research graph |
-| Research style | Aggregator | Investigator |
-
-## What This Skill Does
-
-Most so-called "deep search" systems are still broad aggregators. They search a
-lot, fetch a lot of pages, and compress them into a summary. That is useful,
-but it is not how a good investigator works.
-
-This skill changes the search policy in three ways:
-
-1. `Breadth-first mapping first`
-   The first round does not try to answer immediately. It maps the field:
-   overview sources, representative recent work, foundational sources,
-   benchmarks, and criticism.
-2. `Multi-branch frontier after that`
-   Instead of collapsing onto one lead too early, it keeps several active
-   branches and chooses which ones to deepen next.
-3. `ReAct deepening on each branch`
-   Every later round is driven by what the last round discovered:
-   `SEARCH / FETCH -> REASON -> NEXT JUMP`.
-
-The result is closer to an investigator following an evidence graph than a
-search engine aggregating webpages.
-
-## Search Strategy
-
-The core cycle in the skill is:
+The system keeps the original breadth-first then depth-first idea, but upgrades
+it from topic search to evidence-driven investigation:
 
 ```text
-MAP -> BUILD FRONTIER -> DEEPEN -> REFLECT -> repeat
+FRAME -> MAP -> FRONTIER -> DEEPEN -> CHALLENGE -> SYNTHESIZE
 ```
 
-### Phase 1: Map the field
+That means:
 
-The first pass is explicitly breadth-first. Its job is to build a field map, not
-to answer.
+- the first pass maps evidence classes, not just webpages
+- later search becomes lead-driven, not generic query reformulation
+- strong conclusions require support, challenge paths, and visible reasoning
 
-The skill tries to cover:
-- the latest available overview source
-- recent representative work
-- foundational or defining sources
-- benchmarks, datasets, standards, or evaluation layers
-- criticism, limitations, replications, or competing schools
+## Included Skills
 
-Important detail: it does **not** hard-code a one-year window. It looks for the
-latest *available* overview source for that field. In a slow-moving field that
-may be older; in a fast-moving field it may be very recent.
+| Skill | Use when you need to... |
+|---|---|
+| `researcher` | Route an ambiguous research request and run the shared research operating system |
+| `field-mapping-research` | Map a space, identify branches, actors, debates, and next leads |
+| `claim-validation-research` | Test whether a claim, report, metric, or narrative holds up |
+| `decision-support-research` | Compare options and recommend a path under real constraints |
+| `opportunity-research` | Find credible opportunities, wedges, or emerging directions |
+| `due-diligence-research` | Stress-test a company, product, or thesis against reality |
+| `operator-reality-research` | Understand day-to-day work, hidden friction, and lived experience |
 
-### Phase 2: Build a frontier
+## Core Design
 
-After mapping, the skill creates a frontier of candidate leads rather than
-choosing one thread immediately.
+### 1. Purpose-first routing
 
-Typical branch types include:
-- method branch
-- evidence branch
-- benchmark branch
-- researcher or lab branch
-- criticism branch
-- primary-document branch
+Top-level skills are split by search purpose, not by topic.
 
-This is the core difference from single-thread citation chasing: the skill keeps
-enough diversity to avoid tunnel vision.
+This matters because a single question may span:
 
-### Phase 3: Deepen via ReAct
+- papers
+- job markets
+- community signals
+- company evidence
+- adversarial material
 
-For each active branch, the skill runs:
+Example:
 
-```text
-SEARCH / FETCH -> REASON -> NEXT JUMP
-```
+`"Is AI agent engineer a real entry-level path?"`
 
-After each step it records:
-- `[Finding]` what was confirmed or falsified
-- `[Lead]` what new source or clue appeared
-- `[Gap]` what still lacks a primary source
-- `[Next Jump]` why the next hop is worth taking
+This is not only a job-market question. It may require:
 
-That means later searches are not generic reformulations of the original query.
-They are graph-driven jumps based on newly discovered structure.
+- exact-title job postings
+- adjacent-title job postings
+- company hiring pages
+- LinkedIn trajectories
+- Reddit or forum experience
+- skeptical or adversarial takes
 
-### Phase 4: Stop on saturation
+### 2. Evidence classes instead of single-source hierarchy
 
-The skill does not stop because it reached a fixed number of rounds.
+The shared references treat the internet as a mixed evidence environment:
 
-It stops when the research graph is close to saturated:
-- the main branches are understood
-- key claims are tied to primary or highest-value sources
-- new searches mostly return known nodes or low-value repetition
-- remaining branches are low-yield or redundant
+- official
+- behavioral
+- operator
+- lived experience
+- adversarial
+- market proxy
+- artifact
 
-## Why This Is Different
+This avoids the common mistake of treating "official" as automatically true or
+treating social/community sources as automatically useless.
 
-The skill is designed to avoid three common failure modes in "deep research"
-agents:
+### 3. Visible reasoning
 
-1. `Broad but shallow`
-   Fetching many pages without following the most important leads.
-2. `Narrow too early`
-   Picking one promising thread and missing the rest of the field.
-3. `Fake recency rules`
-   Hard-coding "last year" or "recent" in ways that break for slower fields.
-
-Instead, this skill combines:
-- breadth-first field mapping
-- multi-branch frontier management
-- ReAct-style lead chasing
-- domain-aware source hierarchy
-- saturation-based stopping
-
-## Scientific Research Behavior
-
-For scientific and technical queries, the skill is intentionally optimized to
-stay useful for literature review and research synthesis.
-
-It tries to preserve both ends of the field:
-- the newest edge
-- the deepest roots
-
-It prefers:
-- the latest available review, survey, tutorial, benchmark, or perspective
-- recent representative papers
-- foundational papers
-- benchmarks and evaluation protocols
-- criticism, limitation, and replication work
-
-It also allows the notion of "primary source" to change by domain:
-- scientific research: original paper, appendix, code, dataset, benchmark docs
-- industry: filings, earnings reports, patents, standards, official docs
-- medicine: systematic reviews, RCTs, guidelines, registries, regulator sources
+Each skill is written to keep a visible `research-{topic}.md` log while working.
+The goal is to avoid the familiar failure mode of "searched a lot, but I cannot
+see the actual reasoning path."
 
 ## Repository Structure
 
@@ -167,58 +99,50 @@ It also allows the notion of "primary source" to change by domain:
 researcher-skill/
 ├── README.md
 ├── README.zh-CN.md
-└── researcher/
-    ├── SKILL.md
-    └── references/
-        ├── frontier-management.md
-        ├── scientific-literature.md
-        ├── source-hierarchy.md
-        ├── saturation-and-counterevidence.md
-        └── query-shaping.md
+├── researcher/
+│   ├── SKILL.md
+│   ├── agents/openai.yaml
+│   └── references/
+│       ├── core-method.md
+│       ├── frontier-management.md
+│       ├── query-shaping.md
+│       ├── saturation-and-counterevidence.md
+│       ├── scientific-literature.md
+│       ├── source-hierarchy.md
+│       ├── source-packs-company-intel.md
+│       ├── source-packs-field-signals.md
+│       └── source-packs-jobs.md
+├── field-mapping-research/
+├── claim-validation-research/
+├── decision-support-research/
+├── opportunity-research/
+├── due-diligence-research/
+└── operator-reality-research/
 ```
 
-- `researcher/SKILL.md`
-  The core workflow and hard constraints.
-- `researcher/references/frontier-management.md`
-  Frontier scoring, branch types, breadth floors, and pruning rules.
-- `researcher/references/scientific-literature.md`
-  Literature traversal, overview-source selection, and graph-jump patterns.
-- `researcher/references/source-hierarchy.md`
-  What counts as a primary or highest-value source in each domain.
-- `researcher/references/saturation-and-counterevidence.md`
-  Challenge-path rules and saturation criteria.
-- `researcher/references/query-shaping.md`
-  Query templates for map-phase and deepen-phase search.
+## How The Skills Fit Together
 
-The split is intentional: the core prompt stays lean, and detailed rules are
-broken up by decision type so they can be loaded only when needed.
+`researcher/` is the shared core:
 
-## Example
+- router skill
+- common workflow
+- source hierarchy
+- query shaping
+- challenge-path logic
+- source packs
 
-```text
-Round 1: Map "LLM hallucination mitigation"
-  -> review / benchmark / recent papers / foundational papers / criticism
-  -> branches found:
-     A. retrieval-based methods
-     B. decoding-time methods
-     C. internal steering methods
-     D. benchmark validity / limitations
+The purpose-specific sibling skills are intentionally thin:
 
-Round 2: Deepen A + C + D
-  -> A leads to benchmark papers and dataset details
-  -> C leads to recent representation-steering work
-  -> D leads to replication and evaluation-limit papers
+- strong trigger descriptions
+- focused workflow
+- shared references to `../researcher/references/...`
 
-Round 3+: Jump to primary sources
-  -> follow citations backward, forward, sideways, and downward
-  -> read original papers, appendices, code, and benchmark docs
-  -> prune weak branches, keep high-yield ones alive
-
-Stop:
-  -> no major new method classes, evidence layers, or debates appear
-```
+This keeps the shared method centralized while letting each skill stay tuned to
+its research purpose.
 
 ## Installation
+
+### Local install
 
 Clone the repository:
 
@@ -226,44 +150,77 @@ Clone the repository:
 git clone https://github.com/recomby-ai/researcher-skill.git
 ```
 
-Install the skill into Claude Code:
+Copy all skill folders into your Codex/Claude skill directory:
 
 ```bash
-cp -r researcher-skill/researcher ~/.claude/skills/
+cp -R researcher-skill/researcher ~/.codex/skills/
+cp -R researcher-skill/field-mapping-research ~/.codex/skills/
+cp -R researcher-skill/claim-validation-research ~/.codex/skills/
+cp -R researcher-skill/decision-support-research ~/.codex/skills/
+cp -R researcher-skill/opportunity-research ~/.codex/skills/
+cp -R researcher-skill/due-diligence-research ~/.codex/skills/
+cp -R researcher-skill/operator-reality-research ~/.codex/skills/
 ```
 
-Then use:
+If you are using Claude Code instead of Codex, copy the same folders into
+`~/.claude/skills/`.
+
+Important:
+
+- install `researcher/` together with the purpose-specific skills
+- the sibling skills rely on the shared references inside `researcher/`
+
+### Web upload
+
+When uploading to a web UI, zip the skill directories together.
+
+Include:
+
+- `researcher/`
+- `field-mapping-research/`
+- `claim-validation-research/`
+- `decision-support-research/`
+- `opportunity-research/`
+- `due-diligence-research/`
+- `operator-reality-research/`
+
+Do not upload only one purpose-specific skill unless you also include
+`researcher/`, because the shared references live there.
+
+## Example Prompts
 
 ```text
-/researcher your question
+Use $field-mapping-research to map the AI agent engineering job market.
+Use $claim-validation-research to verify whether this industry claim holds up.
+Use $decision-support-research to compare quant, AI infrastructure, and applied ML for a math undergraduate.
+Use $opportunity-research to identify the most promising wedges in vertical AI for SMBs.
+Use $due-diligence-research to stress-test this startup narrative.
+Use $operator-reality-research to find what practitioners actually complain about in production agent systems.
+Use $researcher to investigate what is really happening here and choose the right research mode.
 ```
 
-## Usage Examples
+## Notes On Current Behavior
 
-```text
-/researcher What are the current solutions to LLM hallucination?
-/researcher CRISPR off-target detection methods — state of the art
-/researcher Is solid-state battery mass production realistic by 2026?
-/researcher Verify whether this industry claim traces back to a primary source
-```
+This repository was refactored to address a few recurring failure modes:
 
-## Core Rules
+- too much generic search, not enough lead chasing
+- not enough challenge-path work
+- role or market research getting trapped by exact job titles
+- invisible reasoning during long searches
 
-- Do not answer after one search round.
-- Do not rely on overview sources alone for important claims.
-- Do not hard-code narrow time windows unless the user asks for one.
-- Do not collapse to one branch too early.
-- Do not widen again with generic search unless the field map has a real blind
-  spot.
-- Search for counter-evidence, not just supporting evidence.
-- Stop on saturation, not round count.
+The current skills explicitly push for:
+
+- breadth-first evidence mapping
+- visible research logs
+- exact-title and adjacent-title checks for market claims
+- use of community, adversarial, and operator sources as signal paths
 
 ## Limitations
 
-- It cannot access Google Scholar through the normal web search tool.
-- It cannot always fetch paywalled full text.
-- It still depends on what the search and fetch tools can reach on the open web.
-- It is not a formal systematic review engine.
+- public-web access still depends on available search and fetch tools
+- some sources remain inaccessible behind paywalls or platform login
+- social and community sources are useful, but still require triangulation
+- these skills improve research behavior; they do not replace domain expertise
 
 ## License
 
